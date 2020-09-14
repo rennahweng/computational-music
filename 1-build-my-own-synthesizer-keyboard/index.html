@@ -6,15 +6,26 @@
 
     <body>
         <h1>Build your own keyboard</h1>
-        
         <p>
             1. Choose your favoriate waveform by clicking on one of the buttons:
-            <br>
+        </p>
+        <div>
             <button id='sine'>sine</button>
             <button id='sawtooth'>sawtooth</button>
             <button id='square'>square</button>
             <button id='triangle'>triangle</button>
-        </p>
+        </div>
+        <!-- 
+        <div class="right">
+            <span>Current waveform: </span>
+            <select name="waveform">
+                <option value="sine">Sine</option>
+                <option value="square" selected>Square</option>
+                <option value="sawtooth">Sawtooth</option>
+                <option value="triangle">Triangle</option>
+            </select>
+            </div>
+        </div> -->
 
         <p>
             2. Hold down to any key to play a single note.
@@ -23,6 +34,8 @@
             3. Release the key to stop playing.
         </p>
     </body>
+
+
 
     <!-- link to javascript -->
     <script src="../1-build-my-own-synthesizer-keyboard/main.js"></script>

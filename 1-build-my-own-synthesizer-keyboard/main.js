@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
     // initialize an audio context
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
+    // initialize a gain node for ADSR envelope
+    const globalGain = audioCtx.createGain();
+    globalGain.connect(audioCtx.destination);
+
+
     // a map from keys to frequencies
     const keyboardFrequencyMap = {
         '90': 261.625565300598634,  //Z - C
@@ -58,17 +63,14 @@ document.addEventListener("DOMContentLoaded", function(event) {
     sineButton.addEventListener('click', function() {
         waveform = "sine"
     });
-
     // If sawtooth button is clicked, change waveform to "sawtooth"
     sawtoothButton.addEventListener('click', function() {
         waveform = "sawtooth"
     });
-
     // If square button is clicked, change waveform to "square"
     squareButton.addEventListener('click', function() {
         waveform = "square"
     });
-
     // If square button is clicked, change waveform to "square"
     triangleButton.addEventListener('click', function() {
         waveform = "triangle"
@@ -82,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     window.addEventListener('keyup', keyUp, false);
 
     activeOscillators = {}
+    activeGainNodes = {}
 
     function keyDown(event) {
         const key = (event.detail || event.which).toString();
@@ -93,23 +96,38 @@ document.addEventListener("DOMContentLoaded", function(event) {
     function keyUp(event) {
         const key = (event.detail || event.which).toString();
         if (keyboardFrequencyMap[key] && activeOscillators[key]) {
-            activeOscillators[key].stop();
-            delete activeOscillators[key];
+            
+            globalGain.gain.setValueAtTime(globalGain.gain.value, audioCtx.currentTime);
+            globalGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+100);
+            setTimeout( function(){
+                activeOscillators[key].stop();
+                delete activeOscillators[key];
+            }, 1000);
         }
     }
 
+
     function playNote(key) {
+
         const osc = audioCtx.createOscillator();
         osc.frequency.setValueAtTime(keyboardFrequencyMap[key], audioCtx.currentTime)
         osc.type = waveform //choose your favorite waveform
-        osc.connect(audioCtx.destination)
-        osc.start();
+       
+        // gain node
+        const globalGain = audioCtx.createGain();
+        globalGain.connect(audioCtx.destination);
         activeOscillators[key] = osc
+        activeGainNodes[key] = osc
+
+        globalGain.gain.setValueAtTime(0.8, audioCtx.currentTime)
+        osc.connect(globalGain)
+        osc.start();
     }
 
     /*
-    Challenges 2: Implement ADSR envelopes for your notes you you don’t get zero-ing clicks. 
-       You will need to add a gain node for this. It will be in between the osc and the audioCtx.
-    */
-
+    * Challenges 2: Implement ADSR envelopes for your notes so you don’t get zero-ing clicks. 
+    * You will need to add a gain node for this. It will be in between the osc and the audioCtx.
+    // */
+    //...
+    // osc.connect(gainNode).connect.(audioCtx.destination);
 });
